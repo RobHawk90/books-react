@@ -9,6 +9,9 @@
 # production
 /build
 
+# server app
+server.jar
+
 # misc
 .DS_Store
 .env.local

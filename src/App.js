@@ -1,8 +1,24 @@
-import React, { Component } from 'react';
-import './css/pure-min.css';
-import './css/side-menu.css';
+import React, { Component } from 'react'
+import './css/pure-min.css'
+import './css/side-menu.css'
 
 class App extends Component {
+
+  constructor() {
+    super()
+    this.state = { authors: [] }
+  }
+
+  componentDidMount() {
+    fetch('http://localhost:8080/api/autores')
+      .then(res => {
+        if (res.ok) return res.json()
+        throw new Error('Not OK')
+      })
+      .then(authors => this.setState({ authors: authors }))
+      .catch(err => console.log(err))
+  }
+
   render() {
     return (
       <div id="layout">
@@ -62,18 +78,24 @@ class App extends Component {
                 </thead>
 
                 <tbody>
-                  <tr>
-                    <td>Robhawk</td>
-                    <td>robhawk.spam@yahoo.com</td>
-                  </tr>
+                  {
+                    this.state.authors.map(author => {
+                      return (
+                        <tr key={author.id}>
+                          <td>{author.nome}</td>
+                          <td>{author.email}</td>
+                        </tr>
+                      )
+                    })
+                  }
                 </tbody>
               </table>
             </div>
           </div>
         </div>
       </div>
-    );
+    )
   }
 }
 
-export default App;
+export default App
