@@ -1,8 +1,9 @@
 {
   "name": "books-react",
-  "version": "0.4.9",
+  "version": "0.6.3",
   "private": true,
   "dependencies": {
+    "pubsub-js": "^1.5.7",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
     "react-scripts": "1.0.13"
