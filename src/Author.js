@@ -113,8 +113,14 @@ class AuthorBox extends Component {
   render() {
     return (
       <div>
-        <AuthorForm />
-        <AuthorList authors={this.state.authors} />
+        <div className="header">
+          <h1>Authors</h1>
+        </div>
+
+        <div className="content" id="content">
+          <AuthorForm />
+          <AuthorList authors={this.state.authors} />
+        </div>
       </div>
     )
   }
