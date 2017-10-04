@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import { Router, Route, browserHistory, IndexRoute } from 'react-router'
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
 
 import './index.css'
 
@@ -12,12 +12,14 @@ import registerServiceWorker from './registerServiceWorker'
 
 ReactDOM.render(
   (
-    <Router history={browserHistory}>
-      <Route path="/" component={App}>
-        <IndexRoute component={Home} />
-        <Route path="/authors" component={AuthorBox} />
-        <Route path="/books" />
-      </Route>
+    <Router>
+      <App>
+        <Switch>
+          <Route exact path="/" component={Home} />
+          <Route path="/authors" component={AuthorBox} />
+          <Route path="/books" />
+        </Switch>
+      </App>
     </Router>
   )
   , document.getElementById('root')
