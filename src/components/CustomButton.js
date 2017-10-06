@@ -6,7 +6,7 @@ class CustomButton extends Component {
     return (
       <div className="pure-control-group">
         <label></label>
-        <button type={this.props.type} className="pure-button pure-button-primary">{this.props.label}</button>
+        <button className="pure-button pure-button-primary">{this.props.label}</button>
       </div>
     )
   }

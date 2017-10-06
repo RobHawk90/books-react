@@ -62,7 +62,7 @@ class AuthorForm extends Component {
           <CustomInput type="text" name="nome" id="name" value={this.state.name} label="Name" onChange={this.setName} />
           <CustomInput type="email" name="email" id="email" value={this.state.email} label="Email" onChange={this.setEmail} />
           <CustomInput type="password" name="senha" id="password" value={this.state.password} label="Password" onChange={this.setPassword} />
-          <CustomButton type="submit" label="Save" />
+          <CustomButton label="Save" />
         </form>
       </div>
     )

@@ -7,6 +7,7 @@ import './index.css'
 import App from './App'
 import Home from './Home'
 import AuthorBox from './Author'
+import BookBox from './Book'
 
 import registerServiceWorker from './registerServiceWorker'
 
@@ -17,7 +18,7 @@ ReactDOM.render(
         <Switch>
           <Route exact path="/" component={Home} />
           <Route path="/authors" component={AuthorBox} />
-          <Route path="/books" />
+          <Route path="/books" component={BookBox} />
         </Switch>
       </App>
     </Router>
