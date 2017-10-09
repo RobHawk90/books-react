@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import { Link } from 'react-router-dom'
 import PubSub from 'pubsub-js'
 
 import ValidationHandler from './ValidationHandler'
@@ -39,32 +38,32 @@ class BookForm extends Component {
     fetch('http://localhost:8080/api/livros', {
       headers: new Headers({ 'Content-type': 'application/json' })
       , method: 'post'
-      , body: JSON.stringify({ title: this.state.title, preco: this.state.price, autorId: this.state.authorId })
+      , body: JSON.stringify({ titulo: this.state.title, preco: this.state.price, autorId: this.state.authorId })
     })
       .then(res => {
         if (res.ok)
           res.json().then(livros => {
             PubSub.publish('update-livros', livros)
-            console.log(livros)
             this.setState({ title: '', price: '', authorId: '' })
           })
-
-        res.json().then(json => {
-          if (res.status === 400) ValidationHandler.publishMessages(json.errors)
-        })
+        else
+          res.json().then(json => {
+            if (res.status === 400) ValidationHandler.publishMessages(json.errors)
+          })
       })
   }
 
   /* @Override from Component */
   render() {
     return (
-      <div className="header">
+      <div className="content-subhead">
         <form className="pure-form pure-form-aligned" onSubmit={this.saveBook}>
           <CustomInput type="text" name="titulo" id="title" label="Title" value={this.state.title} onChange={this.setTitle} />
           <CustomInput type="text" name="preco" id="price" label="Price" value={this.state.price} onChange={this.setPrice} />
           <div className="pure-control-group">
             <label htmlFor="authorId">Author</label>
             <select id="authorId" name="autorId" value={this.state.authorId} onChange={this.setAuthorId}>
+              <option key="0">SELECT AN AUTHOR</option>
               {this.props.authors.map(author => (
                 <option key={author.id} value={author.id}>{author.nome}</option>
               ))}
@@ -81,9 +80,30 @@ class BookForm extends Component {
 
 class BookList extends Component {
 
+  /* @Override from Component */
   render() {
     return (
-      <p>AQUI VEM A LISTA</p>
+      <div className="content-subhead">
+        <table className="pure-table">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Price</th>
+              <th>Author</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {this.props.books.map(book => (
+              <tr key={book.id}>
+                <td>{book.titulo}</td>
+                <td>{book.preco}</td>
+                <td>{book.autor.nome}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     )
   }
 
@@ -94,7 +114,7 @@ class BookBox extends Component {
   constructor() {
     super()
 
-    this.state = { authors: [] }
+    this.state = { authors: [], books: [] }
   }
 
   /* @Override from Component */
@@ -107,7 +127,7 @@ class BookBox extends Component {
 
         <div className="content" id="content">
           <BookForm authors={this.state.authors} />
-          <BookList />
+          <BookList books={this.state.books} />
         </div>
       </div>
     )
@@ -122,6 +142,16 @@ class BookBox extends Component {
       })
       .then(authors => this.setState({ authors: authors }))
       .catch(err => console.log(err));
+
+    fetch('http://localhost:8080/api/livros')
+      .then(res => {
+        if (res.ok) return res.json()
+        throw new Error('Not OK')
+      })
+      .then(books => this.setState({ books: books }))
+      .catch(err => console.log(err))
+
+    PubSub.subscribe('update-livros', (topic, books) => this.setState({ books: books }))
   }
 
 }

@@ -46,10 +46,10 @@ class AuthorForm extends Component {
             PubSub.publish('update-authors', authors)
             this.setState({ name: '', email: '', password: '' })
           })
-
-        res.json().then(json => {
-          if (res.status === 400) ValidationHandler.publishMessages(json.errors)
-        })
+        else
+          res.json().then(json => {
+            if (res.status === 400) ValidationHandler.publishMessages(json.errors)
+          })
       })
 
   }
