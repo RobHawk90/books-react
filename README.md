@@ -14,9 +14,9 @@ A React-based application
   Inside "components" are the classes that encapsulates HTML form inputs. 
 </p>
 
-<h3>3. What is being used?</h3>
+<h2>3. What is being used?</h2>
 <ul>
-  <li><a href="https://purecss.io/" target="_blank">Pure.css</a></li>
+  <li><a href="https://purecss.io/" target="_blank">Pure.css</a> to build the layout</li>
   <li><a href="https://github.com/facebookincubator/create-react-app" target="_blank">create-react-app</a> to create this app</li>
   <li><a href="https://github.com/ReactTraining/react-router/tree/master/packages/react-router-dom" target="_blank">react-router-dom</a> to use browser navigation as SPA</li>
   <li><a href="https://github.com/mroderick/PubSubJS" target="_blank">PubSub</a> to easily interaction between components</li>
