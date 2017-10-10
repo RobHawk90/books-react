@@ -1,9 +1,12 @@
 import React, { Component } from 'react'
 import PubSub from 'pubsub-js'
 
+import AuthorService from './services/AuthorService'
+import BookService from './services/BookService'
 import ValidationHandler from './ValidationHandler'
 import CustomInput from './components/CustomInput'
 import CustomButton from './components/CustomButton'
+import CustomSelect from './components/CustomSelect'
 
 class BookForm extends Component {
 
@@ -12,22 +15,11 @@ class BookForm extends Component {
 
     this.state = { title: '', price: '', authorId: '' }
 
-    this.setAuthorId = this.setAuthorId.bind(this)
-    this.setPrice = this.setPrice.bind(this)
-    this.setTitle = this.setTitle.bind(this)
     this.saveBook = this.saveBook.bind(this)
   }
 
-  setAuthorId(event) {
-    this.setState({ authorId: event.target.value })
-  }
-
-  setTitle(event) {
-    this.setState({ title: event.target.value })
-  }
-
-  setPrice(event) {
-    this.setState({ price: event.target.value })
+  onChange(field, event) {
+    this.setState({ [field]: event.target.value })
   }
 
   saveBook(event) {
@@ -35,21 +27,15 @@ class BookForm extends Component {
 
     PubSub.publish('clear-validations')
 
-    fetch('http://localhost:8080/api/livros', {
-      headers: new Headers({ 'Content-type': 'application/json' })
-      , method: 'post'
-      , body: JSON.stringify({ titulo: this.state.title, preco: this.state.price, autorId: this.state.authorId })
-    })
-      .then(res => {
-        if (res.ok)
-          res.json().then(livros => {
-            PubSub.publish('update-livros', livros)
-            this.setState({ title: '', price: '', authorId: '' })
-          })
-        else
-          res.json().then(json => {
-            if (res.status === 400) ValidationHandler.publishMessages(json.errors)
-          })
+    BookService.save({ titulo: this.state.title, preco: this.state.price, autorId: this.state.authorId })
+      .then(books => {
+        if (books.errors) {
+          ValidationHandler.publishMessages(books.errors)
+          return
+        }
+
+        PubSub.publish('update-books', books)
+        this.setState({ title: '', price: '', authorId: '' })
       })
   }
 
@@ -58,18 +44,13 @@ class BookForm extends Component {
     return (
       <div className="content-subhead">
         <form className="pure-form pure-form-aligned" onSubmit={this.saveBook}>
-          <CustomInput type="text" name="titulo" id="title" label="Title" value={this.state.title} onChange={this.setTitle} />
-          <CustomInput type="text" name="preco" id="price" label="Price" value={this.state.price} onChange={this.setPrice} />
-          <div className="pure-control-group">
-            <label htmlFor="authorId">Author</label>
-            <select id="authorId" name="autorId" value={this.state.authorId} onChange={this.setAuthorId}>
-              <option key="0">SELECT AN AUTHOR</option>
-              {this.props.authors.map(author => (
-                <option key={author.id} value={author.id}>{author.nome}</option>
-              ))}
-            </select>
-            <span className="error"></span>
-          </div>
+          <CustomInput type="text" name="titulo" id="title" label="Title" value={this.state.title} onChange={this.onChange.bind(this, 'title')} />
+          <CustomInput type="text" name="preco" id="price" label="Price" value={this.state.price} onChange={this.onChange.bind(this, 'price')} />
+          <CustomSelect name="autorId" id="authorId" label="Author" value={this.state.authorId} onChange={this.onChange.bind(this, 'authorId')}
+            options={this.props.authors.map(author => {
+              return { value: author.id, label: author.nome }
+            })}
+          />
           <CustomButton label="Save" />
         </form>
       </div>
@@ -135,23 +116,13 @@ class BookBox extends Component {
 
   /* @Override from Component */
   componentDidMount() {
-    fetch('http://localhost:8080/api/autores')
-      .then(res => {
-        if (res.ok) return res.json()
-        throw new Error('Not OK')
-      })
+    AuthorService.listAll()
       .then(authors => this.setState({ authors: authors }))
-      .catch(err => console.log(err));
 
-    fetch('http://localhost:8080/api/livros')
-      .then(res => {
-        if (res.ok) return res.json()
-        throw new Error('Not OK')
-      })
+    BookService.listAll()
       .then(books => this.setState({ books: books }))
-      .catch(err => console.log(err))
 
-    PubSub.subscribe('update-livros', (topic, books) => this.setState({ books: books }))
+    PubSub.subscribe('update-books', (topic, books) => this.setState({ books: books }))
   }
 
 }

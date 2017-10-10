@@ -9,16 +9,19 @@ class CustomInput extends Component {
     this.state = { validationMessage: '' }
   }
 
+  /* @Override from Component */
   render() {
     return (
       <div className="pure-control-group">
         <label htmlFor={this.props.id}>{this.props.label}</label>
-        <input id={this.props.id} type={this.props.type} name={this.props.name} value={this.props.value} onChange={this.props.onChange} />
+        {/*a shorthand declaration of props, but preffer to declare declare each prop rather using spread operators*/}
+        <input {...this.props} />
         <span className="error">{this.state.validationMessage}</span>
       </div>
     )
   }
 
+  /* @Override from Component */
   componentDidMount() {
     PubSub.subscribe('validation-error', (topic, error) => {
       if (error.field === this.props.name)

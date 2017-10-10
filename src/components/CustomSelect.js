@@ -1,25 +1,26 @@
-import React, { Component } from 'react'
+import React from 'react'
 
-class CustomSelect extends Component {
+import CustomInput from './CustomInput'
 
-  constructor() {
-    super()
+class CustomSelect extends CustomInput {
 
-    this.state = { validationError: '', options: [] }
-  }
-
+  /* @Override from Component */
   render() {
     return (
       <div className="pure-control-group">
-        <label for={this.props.id}>{this.props.label}</label>
-        <select id={this.props.id}>
-          {this.state.options.map(option => (
-            <option value={option.value}>{option.label}</option>
+        <label htmlFor={this.props.id}>{this.props.label}</label>
+        <select id={this.props.id} name={this.props.name} value={this.props.value} onChange={this.props.onChange}>
+          <option key="0">{this.props.firstOption || 'SELECT...'}</option>
+          {this.props.options.map(option => (
+            <option key={option.value} value={option.value}>{option.label}</option>
           ))}
         </select>
-        <span className="error">{this.state.validationError}</span>
+        {/*validationMessage is a state inheritance from CustomInput */}
+        <span className="error">{this.state.validationMessage}</span>
       </div>
     )
   }
 
 }
+
+export default CustomSelect

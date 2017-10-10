@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import PubSub from 'pubsub-js'
 
+import AuthorService from './services/AuthorService'
 import ValidationHandler from './ValidationHandler'
 import CustomInput from './components/CustomInput'
 import CustomButton from './components/CustomButton'
@@ -12,22 +13,11 @@ class AuthorForm extends Component {
 
     this.state = { name: '', email: '', password: '' }
 
-    this.setName = this.setName.bind(this)
-    this.setEmail = this.setEmail.bind(this)
-    this.setPassword = this.setPassword.bind(this)
     this.saveAuthor = this.saveAuthor.bind(this)
   }
 
-  setName(event) {
-    this.setState({ name: event.target.value })
-  }
-
-  setEmail(event) {
-    this.setState({ email: event.target.value })
-  }
-
-  setPassword(event) {
-    this.setState({ password: event.target.value })
+  onChange(field, event) {
+    this.setState({ [field]: event.target.value })
   }
 
   saveAuthor(event) {
@@ -35,23 +25,16 @@ class AuthorForm extends Component {
 
     PubSub.publish('clear-validations')
 
-    fetch('http://localhost:8080/api/autores', {
-      headers: new Headers({ 'Content-type': 'application/json' })
-      , method: 'post'
-      , body: JSON.stringify({ nome: this.state.name, email: this.state.email, senha: this.state.password })
-    })
-      .then(res => {
-        if (res.ok)
-          res.json().then(authors => {
-            PubSub.publish('update-authors', authors)
-            this.setState({ name: '', email: '', password: '' })
-          })
-        else
-          res.json().then(json => {
-            if (res.status === 400) ValidationHandler.publishMessages(json.errors)
-          })
-      })
+    AuthorService.save({ nome: this.state.name, email: this.state.email, senha: this.state.password })
+      .then(authors => {
+        if (authors.errors) {
+          ValidationHandler.publishMessages(authors.errors)
+          return
+        }
 
+        PubSub.publish('update-authors', authors)
+        this.setState({ name: '', email: '', password: '' })
+      })
   }
 
   /* @Override from Component */
@@ -59,9 +42,9 @@ class AuthorForm extends Component {
     return (
       <div className="content-subhead">
         <form className="pure-form pure-form-aligned" onSubmit={this.saveAuthor}>
-          <CustomInput type="text" name="nome" id="name" value={this.state.name} label="Name" onChange={this.setName} />
-          <CustomInput type="email" name="email" id="email" value={this.state.email} label="Email" onChange={this.setEmail} />
-          <CustomInput type="password" name="senha" id="password" value={this.state.password} label="Password" onChange={this.setPassword} />
+          <CustomInput type="text" name="nome" id="name" value={this.state.name} label="Name" onChange={this.onChange.bind(this, 'name')} />
+          <CustomInput type="email" name="email" id="email" value={this.state.email} label="Email" onChange={this.onChange.bind(this, 'email')} />
+          <CustomInput type="password" name="senha" id="password" value={this.state.password} label="Password" onChange={this.onChange.bind(this, 'password')} />
           <CustomButton label="Save" />
         </form>
       </div>
@@ -127,13 +110,8 @@ class AuthorBox extends Component {
 
   /* @Override from Component */
   componentDidMount() {
-    fetch('http://localhost:8080/api/autores')
-      .then(res => {
-        if (res.ok) return res.json()
-        throw new Error('Not OK')
-      })
+    AuthorService.listAll()
       .then(authors => this.setState({ authors: authors }))
-      .catch(err => console.log(err))
 
     PubSub.subscribe('update-authors', (topic, authors) => this.setState({ authors: authors }))
   }
